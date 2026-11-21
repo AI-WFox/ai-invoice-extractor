@@ -92,7 +92,7 @@ def test_extract_raises_on_refusal():
 
 
 class FakeGemini:
-    """Stands in for google.genai.Client; fails with HTTP 429 `rate_limited` times first."""
+    """Stands in for google.genai.Client; fails with HTTP 503/429 `rate_limited` times first."""
 
     def __init__(self, payload: dict, rate_limited: int = 0):
         self.calls = []
@@ -103,8 +103,9 @@ class FakeGemini:
 
             self.calls.append(kw)
             if self.rate_limited:
+                code = 429 if self.rate_limited % 2 else 503
                 self.rate_limited -= 1
-                raise errors.APIError(429, {"error": {"code": 429, "message": "quota", "status": "RESOURCE_EXHAUSTED"}})
+                raise errors.APIError(code, {"error": {"code": code, "message": "busy", "status": "UNAVAILABLE"}})
             return SimpleNamespace(text=json.dumps(payload))
 
         self.models = SimpleNamespace(generate_content=generate_content)
