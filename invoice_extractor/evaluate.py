@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .schema import HEADER_FIELDS, Invoice
-from .validate import validate
+from .validate import is_scan, validate
 
 
 def _norm(value):
@@ -72,7 +72,7 @@ class Report:
         }
 
 
-def score(pred: Invoice, gold: Invoice, name: str, report: Report) -> DocScore:
+def score(pred: Invoice, gold: Invoice, name: str, report: Report, scan: bool = False) -> DocScore:
     wrong = []
     for f in HEADER_FIELDS:
         ok = field_equal(getattr(pred, f), getattr(gold, f))
@@ -83,12 +83,12 @@ def score(pred: Invoice, gold: Invoice, name: str, report: Report) -> DocScore:
     report.field_hits["line_items"] = report.field_hits.get("line_items", 0) + int(ok)
     if not ok:
         wrong.append("line_items")
-    doc = DocScore(name=name, wrong_fields=wrong, needs_review=validate(pred).needs_review)
+    doc = DocScore(name=name, wrong_fields=wrong, needs_review=validate(pred, scan=scan).needs_review)
     report.docs.append(doc)
     return doc
 
 
-def evaluate_dirs(pred_dir: Path, gold_dir: Path) -> Report:
+def evaluate_dirs(pred_dir: Path, gold_dir: Path, trust_scans: bool = False) -> Report:
     report = Report()
     for gold_path in sorted(gold_dir.glob("*.json")):
         pred_path = pred_dir / gold_path.name
@@ -103,5 +103,6 @@ def evaluate_dirs(pred_dir: Path, gold_dir: Path) -> Report:
             report.failed += 1
             continue
         pred = Invoice.model_validate(record["invoice"])
-        score(pred, gold, gold_path.stem, report)
+        scan = is_scan(record.get("source", "")) and not trust_scans
+        score(pred, gold, gold_path.stem, report, scan=scan)
     return report
