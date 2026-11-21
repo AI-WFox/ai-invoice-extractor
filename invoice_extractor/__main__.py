@@ -1,6 +1,7 @@
 """Command line: run extraction on a folder, or evaluate results.
 
-    python -m invoice_extractor run samples/docs --out out
+    python -m invoice_extractor run samples/docs --out out                    # Claude
+    python -m invoice_extractor run samples/docs --out out --backend gemini   # Gemini free tier
     python -m invoice_extractor eval out samples/gold
 """
 from __future__ import annotations
@@ -15,26 +16,47 @@ from pathlib import Path
 SUPPORTED = {".pdf", ".png", ".jpg", ".jpeg", ".webp"}
 
 
-def cmd_run(args) -> int:
+def _make_extractor(args):
+    """Return (extract_fn, errors_to_catch) for the chosen backend."""
+    from .extract import ExtractionError
+
+    if args.backend == "gemini":
+        from google import genai
+        from google.genai import errors
+
+        from .extract_gemini import extract_invoice_gemini
+
+        client = genai.Client()
+        return (lambda path: extract_invoice_gemini(path, client=client),
+                (ExtractionError, errors.APIError, ValueError))
+
     import anthropic
 
-    from .extract import ExtractionError, extract_invoice
+    from .extract import extract_invoice
+
+    client = anthropic.Anthropic()
+    return (lambda path: extract_invoice(path, client=client, effort=args.effort),
+            (ExtractionError, anthropic.APIError, ValueError))
+
+
+def cmd_run(args) -> int:
     from .validate import validate
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     files = sorted(p for p in Path(args.input).iterdir() if p.suffix.lower() in SUPPORTED)
-    client = anthropic.Anthropic()
+    extract, failures = _make_extractor(args)
+    workers = args.workers or (1 if args.backend == "gemini" else 4)
 
     def work(path: Path):
         try:
-            inv = extract_invoice(path, client=client, effort=args.effort)
-        except (ExtractionError, anthropic.APIError, ValueError) as e:
+            inv = extract(path)
+        except failures as e:
             return path, None, [f"extraction failed: {e}"]
         return path, inv, validate(inv).issues
 
     rows = []
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+    with ThreadPoolExecutor(max_workers=workers) as pool:
         for path, inv, issues in pool.map(work, files):
             status = "needs_review" if issues else "auto_approved"
             record = {"source": path.name, "status": status, "issues": issues,
@@ -73,8 +95,12 @@ def main(argv=None) -> int:
     r = sub.add_parser("run", help="extract every PDF/image in a folder")
     r.add_argument("input")
     r.add_argument("--out", default="out")
-    r.add_argument("--workers", type=int, default=4)
-    r.add_argument("--effort", default="medium", choices=["low", "medium", "high"])
+    r.add_argument("--backend", default="claude", choices=["claude", "gemini"],
+                   help="claude (ANTHROPIC_API_KEY) or gemini (GEMINI_API_KEY, free tier)")
+    r.add_argument("--workers", type=int, default=None,
+                   help="parallel requests (default 4 for Claude, 1 for Gemini's free tier)")
+    r.add_argument("--effort", default="medium", choices=["low", "medium", "high"],
+                   help="Claude only")
     r.set_defaults(func=cmd_run)
     e = sub.add_parser("eval", help="score extractions against golden labels")
     e.add_argument("pred")

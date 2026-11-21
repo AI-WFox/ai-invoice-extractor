@@ -89,3 +89,38 @@ def test_extract_raises_on_refusal():
     client = FakeClient({}, stop_reason="refusal")
     with pytest.raises(ExtractionError):
         extract_invoice(GOLD.parent / "docs" / "invoice_04.png", client=client)
+
+
+class FakeGemini:
+    """Stands in for google.genai.Client; fails with HTTP 429 `rate_limited` times first."""
+
+    def __init__(self, payload: dict, rate_limited: int = 0):
+        self.calls = []
+        self.rate_limited = rate_limited
+
+        def generate_content(**kw):
+            from google.genai import errors
+
+            self.calls.append(kw)
+            if self.rate_limited:
+                self.rate_limited -= 1
+                raise errors.APIError(429, {"error": {"code": 429, "message": "quota", "status": "RESOURCE_EXHAUSTED"}})
+            return SimpleNamespace(text=json.dumps(payload))
+
+        self.models = SimpleNamespace(generate_content=generate_content)
+
+
+def test_gemini_backend_parses_result_and_retries_rate_limits(monkeypatch):
+    pytest.importorskip("google.genai")
+    from invoice_extractor import extract_gemini
+
+    monkeypatch.setattr(extract_gemini.time, "sleep", lambda s: None)
+    payload = json.loads((GOLD / "invoice_00.json").read_text())
+    client = FakeGemini(payload, rate_limited=2)
+    docs = GOLD.parent / "docs"
+    inv = extract_gemini.extract_invoice_gemini(docs / "invoice_00.pdf", client=client)
+    assert inv == Invoice.model_validate(payload)
+    assert len(client.calls) == 3
+    part = client.calls[-1]["contents"][0]
+    assert part.inline_data.mime_type == "application/pdf"
+    assert client.calls[-1]["config"].response_schema is Invoice
