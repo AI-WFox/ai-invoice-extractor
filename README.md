@@ -88,6 +88,7 @@ import into Excel, Google Sheets, QuickBooks or an ERP.
 
 Run step 2 above and paste the summary here. The eval prints:
 
+- `extraction_failed`: documents the model could not process (API error); these go to review
 - `fully_correct`: share of documents with every field right
 - `field_accuracy`: per field
 - `straight_through_rate`: share auto-approved with no human touch

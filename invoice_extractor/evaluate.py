@@ -51,6 +51,7 @@ class DocScore:
 class Report:
     docs: list[DocScore] = field(default_factory=list)
     field_hits: dict[str, int] = field(default_factory=dict)
+    failed: int = 0
 
     def summary(self) -> dict:
         n = len(self.docs)
@@ -62,6 +63,7 @@ class Report:
         wrong = [d for d in self.docs if not d.correct]
         return {
             "documents": n,
+            "extraction_failed": self.failed,
             "fully_correct": round(sum(d.correct for d in self.docs) / n, 3),
             "field_accuracy": {f: round(h / n, 3) for f, h in self.field_hits.items()},
             "straight_through_rate": round(len(straight_through) / n, 3),
@@ -91,12 +93,15 @@ def evaluate_dirs(pred_dir: Path, gold_dir: Path) -> Report:
     for gold_path in sorted(gold_dir.glob("*.json")):
         pred_path = pred_dir / gold_path.name
         gold = Invoice.model_validate_json(gold_path.read_text())
-        if not pred_path.exists():
-            # A missing prediction counts as wrong on every field, and it was not reviewed.
+        record = json.loads(pred_path.read_text()) if pred_path.exists() else {}
+        if not record.get("invoice"):
+            # A missing or failed extraction counts as wrong on every field;
+            # the pipeline sends it to review, so it is never a silent error.
             report.docs.append(DocScore(gold_path.stem, HEADER_FIELDS + ["line_items"], needs_review=True))
             for f in HEADER_FIELDS + ["line_items"]:
                 report.field_hits.setdefault(f, 0)
+            report.failed += 1
             continue
-        pred = Invoice.model_validate(json.loads(pred_path.read_text())["invoice"])
+        pred = Invoice.model_validate(record["invoice"])
         score(pred, gold, gold_path.stem, report)
     return report

@@ -125,3 +125,13 @@ def test_gemini_backend_parses_result_and_retries_rate_limits(monkeypatch):
     part = client.calls[-1]["contents"][0]
     assert part.inline_data.mime_type == "application/pdf"
     assert client.calls[-1]["config"].response_schema is Invoice
+
+
+def test_failed_extraction_counts_as_caught_error(tmp_path):
+    for p in GOLD.glob("*.json"):
+        (tmp_path / p.name).write_text(json.dumps({"invoice": json.loads(p.read_text())}))
+    (tmp_path / "invoice_00.json").write_text(json.dumps({"invoice": None, "issues": ["extraction failed: 503"]}))
+    s = evaluate_dirs(tmp_path, GOLD).summary()
+    assert s["extraction_failed"] == 1
+    assert s["silent_error_rate"] == 0.0
+    assert s["errors_caught_by_validation"] == "1/1"
