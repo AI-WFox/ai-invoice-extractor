@@ -1,0 +1,38 @@
+{
+  "vendor_name": "Brightline Office Supply Inc.",
+  "invoice_number": "INV-2026-1222",
+  "invoice_date": "2026-09-11",
+  "due_date": "2026-10-11",
+  "currency": "USD",
+  "bill_to": "Delta Clinics Group",
+  "line_items": [
+    {
+      "description": "Consulting hours",
+      "quantity": 2,
+      "unit_price": 95.0,
+      "amount": 190.0
+    },
+    {
+      "description": "Warehouse storage (week)",
+      "quantity": 10,
+      "unit_price": 120.0,
+      "amount": 1200.0
+    },
+    {
+      "description": "Installation service",
+      "quantity": 5,
+      "unit_price": 350.0,
+      "amount": 1750.0
+    },
+    {
+      "description": "Hydraulic seal kit",
+      "quantity": 9,
+      "unit_price": 210.4,
+      "amount": 1893.6
+    }
+  ],
+  "subtotal": 5033.6,
+  "tax": 402.69,
+  "total": 5436.29,
+  "uncertain_fields": []
+}

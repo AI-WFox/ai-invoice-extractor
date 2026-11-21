@@ -1,0 +1,26 @@
+{
+  "vendor_name": "Northwind Logistics LLC",
+  "invoice_number": "INV-2026-1370",
+  "invoice_date": "2026-03-08",
+  "due_date": "2026-04-07",
+  "currency": "USD",
+  "bill_to": "Blue Harbor Foods",
+  "line_items": [
+    {
+      "description": "Safety gloves, pack of 12",
+      "quantity": 4,
+      "unit_price": 18.75,
+      "amount": 75.0
+    },
+    {
+      "description": "Freight handling, pallet",
+      "quantity": 5,
+      "unit_price": 45.0,
+      "amount": 225.0
+    }
+  ],
+  "subtotal": 300.0,
+  "tax": 24.0,
+  "total": 324.0,
+  "uncertain_fields": []
+}

@@ -1,0 +1,38 @@
+{
+  "vendor_name": "Atelier Lumière SARL",
+  "invoice_number": "INV-2026-1296",
+  "invoice_date": "2026-02-17",
+  "due_date": "2026-03-19",
+  "currency": "EUR",
+  "bill_to": "Delta Clinics Group",
+  "line_items": [
+    {
+      "description": "Hydraulic seal kit",
+      "quantity": 8,
+      "unit_price": 210.4,
+      "amount": 1683.2
+    },
+    {
+      "description": "Safety gloves, pack of 12",
+      "quantity": 10,
+      "unit_price": 18.75,
+      "amount": 187.5
+    },
+    {
+      "description": "A4 copy paper, box of 5 reams",
+      "quantity": 8,
+      "unit_price": 32.5,
+      "amount": 260.0
+    },
+    {
+      "description": "Consulting hours",
+      "quantity": 2,
+      "unit_price": 95.0,
+      "amount": 190.0
+    }
+  ],
+  "subtotal": 2320.7,
+  "tax": 440.93,
+  "total": 2761.63,
+  "uncertain_fields": []
+}

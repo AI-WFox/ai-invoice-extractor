@@ -1,0 +1,32 @@
+{
+  "vendor_name": "Northwind Logistics LLC",
+  "invoice_number": "INV-2026-1185",
+  "invoice_date": "2026-10-27",
+  "due_date": "2026-11-26",
+  "currency": "USD",
+  "bill_to": "Orion Studio",
+  "line_items": [
+    {
+      "description": "Safety gloves, pack of 12",
+      "quantity": 7,
+      "unit_price": 18.75,
+      "amount": 131.25
+    },
+    {
+      "description": "Hydraulic seal kit",
+      "quantity": 6,
+      "unit_price": 210.4,
+      "amount": 1262.4
+    },
+    {
+      "description": "Consulting hours",
+      "quantity": 8,
+      "unit_price": 95.0,
+      "amount": 760.0
+    }
+  ],
+  "subtotal": 2153.65,
+  "tax": 172.29,
+  "total": 2325.94,
+  "uncertain_fields": []
+}

@@ -1,0 +1,44 @@
+{
+  "vendor_name": "Atelier Lumière SARL",
+  "invoice_number": "INV-2026-1111",
+  "invoice_date": "2026-10-20",
+  "due_date": null,
+  "currency": "EUR",
+  "bill_to": "Delta Clinics Group",
+  "line_items": [
+    {
+      "description": "Freight handling, pallet",
+      "quantity": 5,
+      "unit_price": 45.0,
+      "amount": 225.0
+    },
+    {
+      "description": "Warehouse storage (week)",
+      "quantity": 7,
+      "unit_price": 120.0,
+      "amount": 840.0
+    },
+    {
+      "description": "Safety gloves, pack of 12",
+      "quantity": 3,
+      "unit_price": 18.75,
+      "amount": 56.25
+    },
+    {
+      "description": "Consulting hours",
+      "quantity": 9,
+      "unit_price": 95.0,
+      "amount": 855.0
+    },
+    {
+      "description": "Installation service",
+      "quantity": 2,
+      "unit_price": 350.0,
+      "amount": 700.0
+    }
+  ],
+  "subtotal": 2676.25,
+  "tax": 508.49,
+  "total": 3184.74,
+  "uncertain_fields": []
+}

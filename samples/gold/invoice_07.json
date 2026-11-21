@@ -1,0 +1,44 @@
+{
+  "vendor_name": "Kessler Maschinenbau GmbH",
+  "invoice_number": "INV-2026-1259",
+  "invoice_date": "2026-01-21",
+  "due_date": null,
+  "currency": "EUR",
+  "bill_to": "Acme Retail Pte Ltd",
+  "line_items": [
+    {
+      "description": "Consulting hours",
+      "quantity": 3,
+      "unit_price": 95.0,
+      "amount": 285.0
+    },
+    {
+      "description": "Safety gloves, pack of 12",
+      "quantity": 6,
+      "unit_price": 18.75,
+      "amount": 112.5
+    },
+    {
+      "description": "Freight handling, pallet",
+      "quantity": 3,
+      "unit_price": 45.0,
+      "amount": 135.0
+    },
+    {
+      "description": "Hydraulic seal kit",
+      "quantity": 8,
+      "unit_price": 210.4,
+      "amount": 1683.2
+    },
+    {
+      "description": "Toner cartridge 85A",
+      "quantity": 7,
+      "unit_price": 68.9,
+      "amount": 482.3
+    }
+  ],
+  "subtotal": 2698.0,
+  "tax": 512.62,
+  "total": 3260.62,
+  "uncertain_fields": []
+}

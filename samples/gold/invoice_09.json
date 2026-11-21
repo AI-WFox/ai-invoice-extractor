@@ -1,0 +1,44 @@
+{
+  "vendor_name": "Công ty TNHH Sao Việt",
+  "invoice_number": "INV-2026-1333",
+  "invoice_date": "2026-01-12",
+  "due_date": "2026-02-11",
+  "currency": "VND",
+  "bill_to": "Orion Studio",
+  "line_items": [
+    {
+      "description": "Warehouse storage (week)",
+      "quantity": 5,
+      "unit_price": 3000000.0,
+      "amount": 15000000.0
+    },
+    {
+      "description": "Freight handling, pallet",
+      "quantity": 12,
+      "unit_price": 1125000.0,
+      "amount": 13500000.0
+    },
+    {
+      "description": "Hydraulic seal kit",
+      "quantity": 7,
+      "unit_price": 5260000.0,
+      "amount": 36820000.0
+    },
+    {
+      "description": "A4 copy paper, box of 5 reams",
+      "quantity": 11,
+      "unit_price": 812500.0,
+      "amount": 8937500.0
+    },
+    {
+      "description": "Toner cartridge 85A",
+      "quantity": 6,
+      "unit_price": 1722500.0,
+      "amount": 10335000.0
+    }
+  ],
+  "subtotal": 84592500.0,
+  "tax": 8459250.0,
+  "total": 93051750.0,
+  "uncertain_fields": []
+}

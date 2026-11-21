@@ -1,0 +1,26 @@
+{
+  "vendor_name": "Kessler Maschinenbau GmbH",
+  "invoice_number": "INV-2026-1074",
+  "invoice_date": "2026-10-26",
+  "due_date": "2026-11-25",
+  "currency": "EUR",
+  "bill_to": "Acme Retail Pte Ltd",
+  "line_items": [
+    {
+      "description": "Warehouse storage (week)",
+      "quantity": 11,
+      "unit_price": 120.0,
+      "amount": 1320.0
+    },
+    {
+      "description": "Safety gloves, pack of 12",
+      "quantity": 11,
+      "unit_price": 18.75,
+      "amount": 206.25
+    }
+  ],
+  "subtotal": 1526.25,
+  "tax": 289.99,
+  "total": 1816.24,
+  "uncertain_fields": []
+}
