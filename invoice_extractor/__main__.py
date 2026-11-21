@@ -56,8 +56,11 @@ def cmd_run(args) -> int:
         return path, inv, validate(inv).issues
 
     rows = []
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        for path, inv, issues in pool.map(work, files):
+    # One worker runs in the main thread so Ctrl+C stops it at once.
+    pool = ThreadPoolExecutor(max_workers=workers) if workers > 1 else None
+    results = pool.map(work, files) if pool else map(work, files)
+    try:
+        for path, inv, issues in results:
             status = "needs_review" if issues else "auto_approved"
             record = {"source": path.name, "status": status, "issues": issues,
                       "invoice": inv.model_dump() if inv else None}
@@ -67,6 +70,9 @@ def cmd_run(args) -> int:
                          "date": inv.invoice_date if inv else "", "currency": inv.currency if inv else "",
                          "total": inv.total if inv else "", "issues": "; ".join(issues)})
             print(f"{status:14} {path.name}" + (f"  ({issues[0]})" if issues else ""))
+    finally:
+        if pool:
+            pool.shutdown(wait=False, cancel_futures=True)
 
     with open(out / "results.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()) if rows else ["file"])
