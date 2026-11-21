@@ -14,6 +14,7 @@ from .extract import SYSTEM, ExtractionError
 from .schema import Invoice
 
 DEFAULT_MODEL = "gemini-3.8-flash"
+RETRY_CODES = {429, 500, 503}
 SUPPORTED_MIME = {"application/pdf", "image/png", "image/jpeg", "image/webp"}
 
 
@@ -22,7 +23,7 @@ def _model() -> str:
 
 
 def extract_invoice_gemini(path: str | Path, client=None, retries: int = 5) -> Invoice:
-    """Extract one invoice with Gemini. Retries on free-tier rate limits (HTTP 429)."""
+    """Extract one invoice with Gemini. Retries on rate limits (429) and overload (500/503)."""
     from google import genai
     from google.genai import errors, types
 
@@ -44,7 +45,7 @@ def extract_invoice_gemini(path: str | Path, client=None, retries: int = 5) -> I
             response = client.models.generate_content(model=_model(), contents=contents, config=config)
             break
         except errors.APIError as e:
-            if getattr(e, "code", None) == 429 and attempt < retries:
+            if getattr(e, "code", None) in RETRY_CODES and attempt < retries:
                 time.sleep(min(60, 5 * 2 ** attempt))
                 continue
             raise

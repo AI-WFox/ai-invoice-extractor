@@ -108,7 +108,7 @@ bank statements, insurance claims, lab reports or contracts:
 4. Run `eval`, look at the failures, adjust the prompt or rules, repeat.
 
 Gemini's free tier is enough to try it (requests are sent one at a time
-and retried when the rate limit hits; set `GEMINI_MODEL` to pick another
+and retried when the rate limit or a busy model hits; set `GEMINI_MODEL` to pick another
 model). Typical cost with Claude Opus 5.5 is a few cents per page; measure it on
 your documents (`--effort low` is cheaper and often enough for clean PDFs).
 
