@@ -1,0 +1,32 @@
+{
+  "vendor_name": "Công ty TNHH Sao Việt",
+  "invoice_number": "INV-2026-1148",
+  "invoice_date": "2026-02-19",
+  "due_date": "2026-03-21",
+  "currency": "VND",
+  "bill_to": "Acme Retail Pte Ltd",
+  "line_items": [
+    {
+      "description": "Warehouse storage (week)",
+      "quantity": 11,
+      "unit_price": 3000000.0,
+      "amount": 33000000.0
+    },
+    {
+      "description": "Consulting hours",
+      "quantity": 4,
+      "unit_price": 2375000.0,
+      "amount": 9500000.0
+    },
+    {
+      "description": "Installation service",
+      "quantity": 6,
+      "unit_price": 8750000.0,
+      "amount": 52500000.0
+    }
+  ],
+  "subtotal": 95000000.0,
+  "tax": 9500000.0,
+  "total": 104500000.0,
+  "uncertain_fields": []
+}

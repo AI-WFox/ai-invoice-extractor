@@ -1,0 +1,38 @@
+{
+  "vendor_name": "Northwind Logistics LLC",
+  "invoice_number": "INV-2026-1000",
+  "invoice_date": "2026-10-26",
+  "due_date": "2026-11-25",
+  "currency": "USD",
+  "bill_to": "Acme Retail Pte Ltd",
+  "line_items": [
+    {
+      "description": "A4 copy paper, box of 5 reams",
+      "quantity": 2,
+      "unit_price": 32.5,
+      "amount": 65.0
+    },
+    {
+      "description": "Toner cartridge 85A",
+      "quantity": 9,
+      "unit_price": 68.9,
+      "amount": 620.1
+    },
+    {
+      "description": "Hydraulic seal kit",
+      "quantity": 2,
+      "unit_price": 210.4,
+      "amount": 420.8
+    },
+    {
+      "description": "Freight handling, pallet",
+      "quantity": 6,
+      "unit_price": 45.0,
+      "amount": 270.0
+    }
+  ],
+  "subtotal": 1375.9,
+  "tax": 110.07,
+  "total": 1485.97,
+  "uncertain_fields": []
+}

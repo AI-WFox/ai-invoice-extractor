@@ -1,0 +1,9 @@
+anthropic>=2.12
+pydantic>=2.7
+pypdfium2>=4.30
+streamlit>=1.50
+# for regenerating sample documents
+reportlab>=4.2
+pillow>=10
+# tests
+pytest>=8
