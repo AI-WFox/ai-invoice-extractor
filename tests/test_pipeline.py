@@ -135,3 +135,23 @@ def test_failed_extraction_counts_as_caught_error(tmp_path):
     assert s["extraction_failed"] == 1
     assert s["silent_error_rate"] == 0.0
     assert s["errors_caught_by_validation"] == "1/1"
+
+
+def test_scan_policy_turns_silent_misread_into_review(tmp_path):
+    # A scan where every amount was misread by a factor of 10: arithmetic still adds up.
+    g = json.loads((GOLD / "invoice_04.json").read_text(encoding="utf-8"))
+    bad = json.loads(json.dumps(g))
+    for li in bad["line_items"]:
+        li["unit_price"] /= 10
+        li["amount"] /= 10
+    for k in ("subtotal", "tax", "total"):
+        bad[k] /= 10
+    assert not validate(Invoice.model_validate(bad)).needs_review
+    for p in GOLD.glob("*.json"):
+        inv = bad if p.stem == "invoice_04" else json.loads(p.read_text(encoding="utf-8"))
+        (tmp_path / p.name).write_text(json.dumps({"source": f"{p.stem}.png" if p.stem == "invoice_04" else f"{p.stem}.pdf", "invoice": inv}), encoding="utf-8")
+    trusted = evaluate_dirs(tmp_path, GOLD, trust_scans=True).summary()
+    assert trusted["silent_error_rate"] > 0
+    policy = evaluate_dirs(tmp_path, GOLD).summary()
+    assert policy["silent_error_rate"] == 0.0
+    assert policy["errors_caught_by_validation"] == "1/1"

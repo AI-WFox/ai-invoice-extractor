@@ -11,6 +11,12 @@ from datetime import date
 from .schema import Invoice
 
 TOLERANCE = 0.01  # one cent
+SCAN_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
+
+
+def is_scan(filename: str) -> bool:
+    """Photos and scans, as opposed to digital PDFs."""
+    return any(filename.lower().endswith(s) for s in SCAN_SUFFIXES)
 
 
 @dataclass
@@ -32,8 +38,13 @@ def _is_iso_date(value: str | None) -> bool:
         return False
 
 
-def validate(inv: Invoice) -> ValidationResult:
+def validate(inv: Invoice, scan: bool = False) -> ValidationResult:
+    """Check one extraction. scan=True adds the scan policy: a model can misread
+    every digit the same way on a blurry photo, so the arithmetic still adds up
+    and only a person can catch it."""
     r = ValidationResult()
+    if scan:
+        r.issues.append("scan or photo: a person should confirm the amounts")
     if not inv.vendor_name.strip():
         r.issues.append("vendor_name is empty")
     if not inv.invoice_number.strip():

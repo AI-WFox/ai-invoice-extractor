@@ -13,7 +13,7 @@ retype invoices into spreadsheets or ERPs by hand.
 
 ![Review queue: the flagged invoice next to its editable fields](docs/review-app.png)
 
-*The review queue. Eleven sample invoices passed every check; one, whose printed total does not add up, waits for a person.*
+*The review queue: a flagged invoice next to its editable fields.*
 
 ## Why this design
 
@@ -24,7 +24,7 @@ work:
 | Step | Who does it | Why |
 |---|---|---|
 | Read the page | Claude or Gemini (vision + PDF input, JSON-schema structured output) | Handles any layout, language, number format, or scan quality without templates |
-| Check the result | Plain Python rules | Line items × price = amount, items sum to subtotal, subtotal + tax = total, valid dates, ISO currency, model's own "unsure" flags |
+| Check the result | Plain Python rules | Line items × price = amount, items sum to subtotal, subtotal + tax = total, valid dates, ISO currency, model's own "unsure" flags, scans always confirmed by a person |
 | Decide | Rules | Pass → auto-approved. Fail → review queue |
 | Fix the rest | A person, in the review app | Side-by-side document and editable fields, re-validated on approve |
 | Measure | `eval` command against golden labels | Reports the **silent error rate**: wrong documents that passed every check |
@@ -86,17 +86,42 @@ import into Excel, Google Sheets, QuickBooks or an ERP.
 
 ## Results on the sample set
 
-Run step 2 above and paste the summary here. The eval prints:
+Measured on 2026-11-21 with **Gemini 3.5 Flash-Lite** (free tier) on the 12
+sample invoices, then scored with `eval`:
 
-- `extraction_failed`: documents the model could not process (API error); these go to review
-- `fully_correct`: share of documents with every field right
-- `field_accuracy`: per field
-- `straight_through_rate`: share auto-approved with no human touch
-- `silent_error_rate`: share auto-approved **and** wrong (the number to drive to zero)
-- `errors_caught_by_validation`: wrong documents the rules sent to review
+| Metric | Arithmetic checks only (`--trust-scans`) | Checks + scan policy (default) |
+|---|---|---|
+| Documents fully correct | 10/12 (83%) | 10/12 (83%) |
+| Vendor, number, dates, currency | 100% | 100% |
+| Amounts and line items | 83% | 83% |
+| Straight-through (no human touch) | 11/12 (92%) | 9/12 (75%) |
+| **Silent errors** (auto-approved and wrong) | **2/12 (17%)** | **0/12** |
+| Wrong documents caught before the books | 0/2 | 2/2 |
 
-`invoice_07` deliberately has a printed total that doesn't add up; the
-rules must route it to review.
+What the eval found:
+
+- Every digital PDF was read correctly, including the misprinted
+  `invoice_07`, which the rules sent to review as intended.
+- Both errors were the VND phone scans (`invoice_04`, `invoice_09`). The
+  model misread the amounts *consistently*, so quantity x price, the
+  subtotal, tax and total all still added up and every arithmetic check
+  passed. A "model returned JSON" demo would ship these numbers.
+- The fix is a policy, not a better prompt: scans and photos always get a
+  human check of the amounts. That costs two extra reviews out of twelve and
+  takes the silent error rate to zero. `--trust-scans` turns it off for
+  clients whose scans are clean.
+
+Reproduce:
+
+```bash
+python -m invoice_extractor run samples/docs --out out --backend gemini
+python -m invoice_extractor eval out samples/gold                 # default policy
+python -m invoice_extractor eval out samples/gold --trust-scans   # checks only
+```
+
+The eval reports `extraction_failed`, `fully_correct`, `field_accuracy`,
+`straight_through_rate`, `silent_error_rate` (the number to drive to zero) and
+`errors_caught_by_validation`.
 
 ## Adapting it to your documents
 

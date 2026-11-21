@@ -40,7 +40,7 @@ def _make_extractor(args):
 
 
 def cmd_run(args) -> int:
-    from .validate import validate
+    from .validate import is_scan, validate
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -53,7 +53,7 @@ def cmd_run(args) -> int:
             inv = extract(path)
         except failures as e:
             return path, None, [f"extraction failed: {e}"]
-        return path, inv, validate(inv).issues
+        return path, inv, validate(inv, scan=is_scan(path.name) and not args.trust_scans).issues
 
     rows = []
     # One worker runs in the main thread so Ctrl+C stops it at once.
@@ -86,7 +86,7 @@ def cmd_run(args) -> int:
 def cmd_eval(args) -> int:
     from .evaluate import evaluate_dirs
 
-    report = evaluate_dirs(Path(args.pred), Path(args.gold))
+    report = evaluate_dirs(Path(args.pred), Path(args.gold), trust_scans=args.trust_scans)
     print(json.dumps(report.summary(), indent=2))
     for d in report.docs:
         if d.wrong_fields:
@@ -107,10 +107,14 @@ def main(argv=None) -> int:
                    help="parallel requests (default 4 for Claude, 1 for Gemini's free tier)")
     r.add_argument("--effort", default="medium", choices=["low", "medium", "high"],
                    help="Claude only")
+    r.add_argument("--trust-scans", action="store_true",
+                   help="let scans and photos skip review when the checks pass")
     r.set_defaults(func=cmd_run)
     e = sub.add_parser("eval", help="score extractions against golden labels")
     e.add_argument("pred")
     e.add_argument("gold")
+    e.add_argument("--trust-scans", action="store_true",
+                   help="score as if scans could skip review when the checks pass")
     e.set_defaults(func=cmd_eval)
     args = p.parse_args(argv)
     return args.func(args)
