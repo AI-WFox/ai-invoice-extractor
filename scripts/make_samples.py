@@ -160,7 +160,7 @@ def main() -> None:
             pdf.unlink()
         if i == 7:
             gold["total"] = render["printed_total"]  # the label is what's printed; validation must flag it
-        (gold_dir / f"{name}.json").write_text(json.dumps(gold, indent=2, ensure_ascii=False))
+        (gold_dir / f"{name}.json").write_text(json.dumps(gold, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"wrote {a.n} invoices to {docs} and labels to {gold_dir}")
 
 

@@ -92,8 +92,8 @@ def evaluate_dirs(pred_dir: Path, gold_dir: Path) -> Report:
     report = Report()
     for gold_path in sorted(gold_dir.glob("*.json")):
         pred_path = pred_dir / gold_path.name
-        gold = Invoice.model_validate_json(gold_path.read_text())
-        record = json.loads(pred_path.read_text()) if pred_path.exists() else {}
+        gold = Invoice.model_validate_json(gold_path.read_text(encoding="utf-8"))
+        record = json.loads(pred_path.read_text(encoding="utf-8")) if pred_path.exists() else {}
         if not record.get("invoice"):
             # A missing or failed extraction counts as wrong on every field;
             # the pipeline sends it to review, so it is never a silent error.

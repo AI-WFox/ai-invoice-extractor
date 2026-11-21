@@ -64,7 +64,7 @@ def cmd_run(args) -> int:
             status = "needs_review" if issues else "auto_approved"
             record = {"source": path.name, "status": status, "issues": issues,
                       "invoice": inv.model_dump() if inv else None}
-            (out / f"{path.stem}.json").write_text(json.dumps(record, indent=2, ensure_ascii=False))
+            (out / f"{path.stem}.json").write_text(json.dumps(record, indent=2, ensure_ascii=False), encoding="utf-8")
             rows.append({"file": path.name, "status": status,
                          "vendor": inv.vendor_name if inv else "", "invoice_number": inv.invoice_number if inv else "",
                          "date": inv.invoice_date if inv else "", "currency": inv.currency if inv else "",
