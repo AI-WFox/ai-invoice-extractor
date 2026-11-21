@@ -13,7 +13,7 @@ GOLD = Path(__file__).parent.parent / "samples" / "gold"
 
 
 def gold(name: str) -> Invoice:
-    return Invoice.model_validate_json((GOLD / f"{name}.json").read_text())
+    return Invoice.model_validate_json((GOLD / f"{name}.json").read_text(encoding="utf-8"))
 
 
 def test_clean_invoices_pass_validation():
@@ -53,7 +53,7 @@ def test_eval_counts_silent_errors():
 
 def test_evaluate_dirs_with_perfect_predictions(tmp_path):
     for p in GOLD.glob("*.json"):
-        (tmp_path / p.name).write_text(json.dumps({"invoice": json.loads(p.read_text())}))
+        (tmp_path / p.name).write_text(json.dumps({"invoice": json.loads(p.read_text(encoding="utf-8"))}))
     s = evaluate_dirs(tmp_path, GOLD).summary()
     assert s["fully_correct"] == 1.0
     assert s["silent_error_rate"] == 0.0
@@ -77,7 +77,7 @@ class FakeClient:
 
 
 def test_extract_sends_pdf_and_parses_result():
-    payload = json.loads((GOLD / "invoice_00.json").read_text())
+    payload = json.loads((GOLD / "invoice_00.json").read_text(encoding="utf-8"))
     client = FakeClient(payload)
     inv = extract_invoice(GOLD.parent / "docs" / "invoice_00.pdf", client=client)
     assert inv == gold("invoice_00")
@@ -116,7 +116,7 @@ def test_gemini_backend_parses_result_and_retries_rate_limits(monkeypatch):
     from invoice_extractor import extract_gemini
 
     monkeypatch.setattr(extract_gemini.time, "sleep", lambda s: None)
-    payload = json.loads((GOLD / "invoice_00.json").read_text())
+    payload = json.loads((GOLD / "invoice_00.json").read_text(encoding="utf-8"))
     client = FakeGemini(payload, rate_limited=2)
     docs = GOLD.parent / "docs"
     inv = extract_gemini.extract_invoice_gemini(docs / "invoice_00.pdf", client=client)
@@ -129,8 +129,8 @@ def test_gemini_backend_parses_result_and_retries_rate_limits(monkeypatch):
 
 def test_failed_extraction_counts_as_caught_error(tmp_path):
     for p in GOLD.glob("*.json"):
-        (tmp_path / p.name).write_text(json.dumps({"invoice": json.loads(p.read_text())}))
-    (tmp_path / "invoice_00.json").write_text(json.dumps({"invoice": None, "issues": ["extraction failed: 503"]}))
+        (tmp_path / p.name).write_text(json.dumps({"invoice": json.loads(p.read_text(encoding="utf-8"))}))
+    (tmp_path / "invoice_00.json").write_text(json.dumps({"invoice": None, "issues": ["extraction failed: 503"]}), encoding="utf-8")
     s = evaluate_dirs(tmp_path, GOLD).summary()
     assert s["extraction_failed"] == 1
     assert s["silent_error_rate"] == 0.0

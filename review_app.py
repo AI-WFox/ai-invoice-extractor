@@ -22,7 +22,7 @@ approved_dir = results / "approved"
 approved_dir.mkdir(parents=True, exist_ok=True)
 
 st.set_page_config(page_title="Invoice review", layout="wide")
-records = {p.stem: json.loads(p.read_text()) for p in sorted(results.glob("*.json"))}
+records = {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in sorted(results.glob("*.json"))}
 queue = [k for k, r in records.items() if r["status"] == "needs_review" and not (approved_dir / f"{k}.json").exists()]
 done = len(list(approved_dir.glob("*.json")))
 auto = sum(r["status"] == "auto_approved" for r in records.values())
@@ -70,5 +70,5 @@ with right:
             remaining = validate(checked).issues
             (approved_dir / f"{name}.json").write_text(json.dumps(
                 {"source": rec["source"], "invoice": checked.model_dump(), "reviewer_notes": remaining},
-                indent=2, ensure_ascii=False))
+                indent=2, ensure_ascii=False), encoding="utf-8")
             st.rerun()
