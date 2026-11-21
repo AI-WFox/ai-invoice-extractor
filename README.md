@@ -1,11 +1,19 @@
 # AI Invoice Extractor
 
+[![tests](https://github.com/AI-WFox/ai-invoice-extractor/actions/workflows/tests.yml/badge.svg)](https://github.com/AI-WFox/ai-invoice-extractor/actions/workflows/tests.yml)
+![python](https://img.shields.io/badge/python-3.10%2B-blue)
+![license](https://img.shields.io/badge/license-MIT-green)
+
 Turn invoices (PDFs and phone scans) into clean, structured data, with
 arithmetic checks, a human review queue for anything doubtful, and an
 evaluation harness that measures how often the automation is wrong.
 
 Built for accounts-payable teams, bookkeepers and back offices that still
 retype invoices into spreadsheets or ERPs by hand.
+
+![Review queue: the flagged invoice next to its editable fields](docs/review-app.png)
+
+*The review queue. Eleven sample invoices passed every check; one, whose printed total does not add up, waits for a person.*
 
 ## Why this design
 
