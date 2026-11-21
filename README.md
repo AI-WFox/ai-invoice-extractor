@@ -23,7 +23,7 @@ work:
 
 | Step | Who does it | Why |
 |---|---|---|
-| Read the page | Claude (vision + PDF input, JSON-schema structured output) | Handles any layout, language, number format, or scan quality without templates |
+| Read the page | Claude or Gemini (vision + PDF input, JSON-schema structured output) | Handles any layout, language, number format, or scan quality without templates |
 | Check the result | Plain Python rules | Line items × price = amount, items sum to subtotal, subtotal + tax = total, valid dates, ISO currency, model's own "unsure" flags |
 | Decide | Rules | Pass → auto-approved. Fail → review queue |
 | Fix the rest | A person, in the review app | Side-by-side document and editable fields, re-validated on approve |
@@ -31,7 +31,7 @@ work:
 
 ```mermaid
 flowchart LR
-    A[PDF / image] --> B[Claude extraction<br/>strict JSON schema]
+    A[PDF / image] --> B[LLM extraction<br/>Claude or Gemini, strict JSON schema]
     B --> C{Validation rules}
     C -- pass --> D[Auto-approved<br/>results.csv]
     C -- fail --> E[Review queue<br/>Streamlit app]
@@ -45,6 +45,7 @@ flowchart LR
 invoice_extractor/
   schema.py     Pydantic model shared by extraction, labels and review
   extract.py    Claude call: PDF/image in, validated Invoice out
+  extract_gemini.py  same with Gemini (free tier), retries on rate limits
   validate.py   deterministic business rules -> needs_review or not
   evaluate.py   field accuracy, straight-through rate, silent error rate
   __main__.py   CLI: run / eval
@@ -58,10 +59,13 @@ tests/          runs offline with a fake client, no API key needed
 
 ```bash
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=...            # your key from console.anthropic.com
 
-# 1. extract every document in a folder
+# 1. extract every document in a folder, with either backend
+export ANTHROPIC_API_KEY=...            # key from console.anthropic.com
 python -m invoice_extractor run samples/docs --out out
+
+export GEMINI_API_KEY=...               # free key from aistudio.google.com
+python -m invoice_extractor run samples/docs --out out --backend gemini
 
 # 2. score it against the golden labels
 python -m invoice_extractor eval out samples/gold
@@ -103,7 +107,9 @@ bank statements, insurance claims, lab reports or contracts:
 3. Label 30 to 50 of your real documents as JSON in a `gold/` folder.
 4. Run `eval`, look at the failures, adjust the prompt or rules, repeat.
 
-Typical cost with Claude Opus 5.5 is a few cents per page; measure it on
+Gemini's free tier is enough to try it (requests are sent one at a time
+and retried when the rate limit hits; set `GEMINI_MODEL` to pick another
+model). Typical cost with Claude Opus 5.5 is a few cents per page; measure it on
 your documents (`--effort low` is cheaper and often enough for clean PDFs).
 
 ## Notes
@@ -111,8 +117,9 @@ your documents (`--effort low` is cheaper and often enough for clean PDFs).
 - Uses Anthropic's structured outputs, so the response always matches the schema.
 - Server-side fallback is enabled: if a request is declined by a safety
   classifier, it is retried on a fallback model in the same call.
-- Documents are sent to the Anthropic API; for sensitive data, check your
-  data-processing requirements first.
+- Documents are sent to the chosen provider's API. On Gemini's free tier,
+  Google may use inputs to improve its products, so use only sample or
+  non-sensitive documents there.
 
 ## License
 
